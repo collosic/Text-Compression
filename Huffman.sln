@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huffman", "Huffman\Huffman.csproj", "{08D48509-64DB-4AD6-B636-7DE6B9DAB326}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetText.NUnitTest", "GetText.NUnitTest\GetText.NUnitTest.csproj", "{CA9B4A96-927C-4B81-8D03-3B48CB244929}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompressText.NUnitTest", "GetText.NUnitTest\CompressText.NUnitTest.csproj", "{CA9B4A96-927C-4B81-8D03-3B48CB244929}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

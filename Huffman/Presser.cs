@@ -7,12 +7,7 @@ namespace Huffman
 {
     public abstract class Presser : ICommonPress
     {
-        public FileStream CloseFile(string fileName)
-        {
-            throw new Exception("Not now");
-
-        }
-
+        public abstract List<Tuple<string, int>> GetFrequencyList(string data);
         public string GetTextFromFile(string fileName)
         {
             FileStream fs = null;
@@ -36,6 +31,12 @@ namespace Huffman
                     fs.Dispose();
             }
             return readText;
+        }
+
+        public FileStream CloseFile(string fileName)
+        {
+            throw new Exception("Not now");
+
         }
     }
 }
