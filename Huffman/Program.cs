@@ -31,7 +31,8 @@ namespace Huffman
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("c")) != null)
             {
                 Console.WriteLine("Let's begin compressing...");
-
+                Compress comp = new Compress(arguments.fileName);
+                comp.start();
             }
             else if (arguments.getArgs()
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("u")) != null)

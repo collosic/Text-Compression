@@ -11,7 +11,7 @@ namespace Huffman
         // private member data
         private string[] args;
         private List<string> arguments;
-        private string fileName;
+        public string fileName { get; private set; }
 
         // constructor
         public Arguments(string[] incomingArguments)

@@ -7,7 +7,7 @@ namespace Huffman
 {
     public abstract class Presser : ICommonPress
     {
-        public abstract List<Tuple<string, int>> GetFrequencyList(string data);
+        public abstract List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data);
         public string GetTextFromFile(string fileName)
         {
             FileStream fs = null;
