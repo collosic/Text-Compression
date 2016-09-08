@@ -9,9 +9,11 @@ namespace Huffman
     public class HuffmanNode
     {
         public string _chars { get; private set; }
-        public  int _freq { get; private set; }
+        public int _freq { get; private set; }
         public HuffmanNode leftNode { get; private set; }
         public HuffmanNode rightNode { get; private set; }
+        public List<HuffmanNode> neighbors { get; private set; }
+        public char bitValue { get; private set; }
 
         public HuffmanNode(string characters, int numFreq, HuffmanNode lnode = null, HuffmanNode rnode = null)
         {
@@ -19,13 +21,22 @@ namespace Huffman
             this._freq = numFreq;
             this.leftNode = lnode;
             this.rightNode = rnode;
+            this.neighbors = new List<HuffmanNode>() { lnode, rnode };
         }
 
-        public bool IsLeaf(ref HuffmanNode node)
+        public void SetBitOff()
         {
-            return node.leftNode == null && node.rightNode == null;
+            this.bitValue = '0';
         }
 
+        public void SetBitOn()
+        {
+            this.bitValue = '1';
+        }
 
+        public bool IsLeaf()
+        {
+            return this.leftNode == null && this.rightNode == null;
+        }
     }
 }

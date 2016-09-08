@@ -106,7 +106,7 @@ namespace CompressText.NUnitTest
         }
 
         [Test]
-        public void TestThrowInvalidCharacterFound()
+        public void ThrowInvalidCharacterFound()
         {
             string myText = "alkdjsfkyehcƒ €";
             Compress comp = new Compress("Generic");
@@ -123,6 +123,45 @@ namespace CompressText.NUnitTest
 
             HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
             Assert.That(myText.Count, Is.EqualTo(root._freq));
+        }
+
+        [Test]
+        public void TestRootNodeAgain()
+        {
+            string myText = "Mississippi River";
+            Compress comp = new Compress("Generic");
+            List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
+
+            HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
+            Assert.That(myText.Count, Is.EqualTo(root._freq));
+        }
+
+        [Test]
+        public void EncodedDictionaryTest()
+        {
+            string myText = "abbcccXXXXZZZZZ";
+            Dictionary<char, string> testDict = new Dictionary<char, string>();
+
+            testDict.Add('a', "111");
+            testDict.Add('b', "110");
+            testDict.Add('c', "10");
+            testDict.Add('X', "01");
+            testDict.Add('Z', "00");
+            
+            Compress comp = new Compress("Generic");
+            List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
+
+            HuffmanNode rootNode = comp.ConstructHuffmanTree(myNewList);
+            Dictionary<char, string> encodedDict = comp.CreateNewBinaryDictionary(rootNode);
+
+            Assert.AreEqual(ToAssertTableString(testDict), ToAssertTableString(encodedDict));          
+        }
+
+        public string ToAssertTableString(IDictionary<char, string> dictionary)
+        {
+            var pairStrings = dictionary.OrderBy(p => p.Key)
+                .Select(p => p.Key + ": " + string.Join(", ", p.Value));
+            return string.Join("; ", pairStrings);
         }
     }
 }

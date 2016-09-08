@@ -27,14 +27,7 @@ namespace Huffman
             {
                 if (c < 128)
                 {
-                    if (frequencyTable.ContainsKey(c))
-                    {
-                        frequencyTable[c] += 1;
-                    }
-                    else
-                    {
-                        frequencyTable.Add(c, 1);
-                    }
+                    frequencyTable[c] = frequencyTable.ContainsKey(c) ? frequencyTable[c] + 1 : 1;
                 }
                 else
                 {
@@ -72,9 +65,12 @@ namespace Huffman
                 HuffmanNode right = freqList.ElementAt(listCount - 1).Item3;
                 HuffmanNode left = freqList.ElementAt(listCount - 2).Item3;
 
-                // Create a new parent node and attache the left and right nodes
+                // Add the bit represention from parent to child edge
+                right.SetBitOn();
+                left.SetBitOff();
+
+                // Create a new parent node and attach the left and right nodes
                 string mergedChars = left._chars + right._chars;
-                Console.WriteLine(mergedChars);
                 int mergedFreq = left._freq + right._freq;
                 HuffmanNode parentNode = new HuffmanNode(mergedChars, mergedFreq, left, right);
 
@@ -87,9 +83,49 @@ namespace Huffman
             return freqList[0].Item3;
         }
 
+        public Dictionary<char, string> CreateNewBinaryDictionary(HuffmanNode rootNode)
+        {
+            Dictionary<char, string> encodedDict = new Dictionary<char, string>();
+            Stack<char> binaryEncoding = new Stack<char>();
+            DFS(rootNode, binaryEncoding, encodedDict);
+            return encodedDict;
+        }
+
+        public void DFS(HuffmanNode node, Stack<char> binaryEncoding, Dictionary<char, string> encodedDict)
+        {
+            // Traverse each neighboring child node from left to right
+            foreach(HuffmanNode neighbor in node.neighbors)
+            {
+                // Push the next bit on the stack
+                binaryEncoding.Push(neighbor.bitValue);
+                
+                // Check and see if the neighbors are leaves
+                if(neighbor.IsLeaf())
+                {
+                    // Extract the bit encoding from the stack and into a string builder
+                    StringBuilder binaryBits = new StringBuilder();
+                    foreach (char c in binaryEncoding.Reverse()) binaryBits.Append(c);
+
+                    // Store in the Binary Encoded Dictionary
+                    encodedDict.Add(neighbor._chars.ToCharArray()[0], binaryBits.ToString());
+                    binaryEncoding.Pop();
+                }
+                else
+                {
+                    DFS(neighbor, binaryEncoding, encodedDict);
+                    binaryEncoding.Pop();
+                }
+            }
+        }
+
         public void start()
         {
-            
+            string myText = "abbcccXXXXZZZZZ";
+            Compress comp = new Compress("Generic");
+            List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
+
+            HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
+            comp.CreateNewBinaryDictionary(root);
         }
     }
 }
