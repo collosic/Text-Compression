@@ -163,5 +163,56 @@ namespace CompressText.NUnitTest
                 .Select(p => p.Key + ": " + string.Join(", ", p.Value));
             return string.Join("; ", pairStrings);
         }
+
+        [Test]
+        public void CheckEncodedBinaryList()
+        {
+            string myText = "abbcccXXXXZZZZZ";
+            Compress comp = new Compress("Generic");
+
+            HuffmanNode rootNode = comp.ConstructHuffmanTree(comp.GetFrequencyList(myText));
+            Dictionary<char, string> encodedDict = comp.CreateNewBinaryDictionary(rootNode);
+            List<byte> encodedBytes = comp.GenerateBinaryEncoding(encodedDict, myText);
+
+            List<byte> expectedBytes = new List<byte>() { 0xDF, 0x2A, 0x55, 0x00, 0x00, 0x01 };
+
+            CollectionAssert.AreEqual(expectedBytes, encodedBytes);
+        }
+
+        [Test]
+        public void TestOffsetConverter()
+        {
+            Compress comp = new Compress("Generic");
+            byte bitIndex = 0x01;
+
+            for (int i = 0; i <= 7; ++i)
+            {
+                byte test = (byte) (bitIndex == 0x00 ? 0x80 : bitIndex >> 1);
+                byte offset = comp.ConvertBitIndexToOffset(test);
+                Assert.That(i, Is.EqualTo(offset));
+                bitIndex <<= 1;
+            }
+        }
+
+        [Test]
+        public void HuffmanKeyTest()
+        {
+            string myText = "abbcccXXXXZZZZZ";
+            Compress comp = new Compress("Generic");
+            List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
+
+            List<byte> expectedKey = new List<byte>()
+            { 0x05, 0x61, 0x01, 0x00, 0x62, 0x02, 0x00, 0x63, 0x03, 0x00, 0x58, 0x04, 0x00, 0x5A, 0x05, 0x00 };
+
+            List<byte> returnedKey = comp.CreateEncodingKey(myNewList);
+
+            CollectionAssert.AreEqual(expectedKey, returnedKey);
+        }
+
+        [Test]
+        public void WritetoFile()
+        {
+
+        }
     }
 }

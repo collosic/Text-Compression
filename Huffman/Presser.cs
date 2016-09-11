@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace Huffman
 {
@@ -33,10 +34,17 @@ namespace Huffman
             return readText;
         }
 
-        public FileStream CloseFile(string fileName)
+        public void WriteBytesToFile(string fileName, string ext, List<byte> bytesToWrite)
         {
-            throw new Exception("Not now");
-
+            string fullName = fileName + "." + ext;
+            try
+            {
+                File.WriteAllBytes(fullName, bytesToWrite.ToArray());
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }
