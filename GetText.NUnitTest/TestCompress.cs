@@ -26,8 +26,11 @@ namespace CompressText.NUnitTest
             // Instantiate the Class and begin test
             Compress c = new Compress(path);
 
+            // read in bytes and test the characters 
+            List<byte> readInBytes = c.ReadBytesFromFile(path);
+
             // Assert 
-            Assert.That(myText, Is.EqualTo(c.GetTextFromFile(path)));
+            Assert.That(myText, Is.EqualTo(c.ConvertBytesToText(readInBytes)));
 
             DeleteIfExists(path);
         }
@@ -37,7 +40,7 @@ namespace CompressText.NUnitTest
         {
             string path = @"C:\DoesNotExist.txt";
             Compress c = new Compress(path);
-            Assert.Throws(typeof(FileNotFoundException), delegate { c.GetTextFromFile(path); } );
+            Assert.Throws(typeof(FileNotFoundException), delegate { c.ReadBytesFromFile(path); } );
         }
 
         private void DeleteIfExists(string path)
@@ -207,12 +210,6 @@ namespace CompressText.NUnitTest
             List<byte> returnedKey = comp.CreateEncodingKey(myNewList);
 
             CollectionAssert.AreEqual(expectedKey, returnedKey);
-        }
-
-        [Test]
-        public void WritetoFile()
-        {
-
         }
     }
 }

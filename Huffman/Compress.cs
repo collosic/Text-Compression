@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Huffman
 {
@@ -11,7 +10,7 @@ namespace Huffman
     {
         // Variables needed in Compress
         private string path;
-        private string readInText;
+        //private string readInText;
 
         public Compress(string path)
         {
@@ -19,7 +18,7 @@ namespace Huffman
         }
 
         // Abstract Method implementation
-        public override List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data)
+        public List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data)
         {
             Dictionary<char, int> frequencyTable = new Dictionary<char, int>();
 
@@ -40,18 +39,11 @@ namespace Huffman
             return frequencyList;
         }
 
-        public List<Tuple<string, int, HuffmanNode>> ConvertDictToList(Dictionary<char, int> table)
+        public string ConvertBytesToText(List<byte> bytes)
         {
-            List<Tuple<string, int, HuffmanNode>> convertedList = new List<Tuple<string, int, HuffmanNode>>();
-            foreach (KeyValuePair<char, int> entry in table)
-            {
-                string key = entry.Key.ToString();
-                int pair = entry.Value;
-                HuffmanNode node = new HuffmanNode(key, pair);
-                convertedList.Add(new Tuple<string, int, HuffmanNode>(key, pair, node));
-            }
-            return convertedList;
+            return System.Text.Encoding.UTF8.GetString(bytes.ToArray());
         }
+
 
         public HuffmanNode ConstructHuffmanTree(List<Tuple<string, int, HuffmanNode>> freqList)
         {
@@ -216,6 +208,28 @@ namespace Huffman
             return huffmanKey;
         }
 
+        public List<byte> BuildFullEndcodedList(List<byte> keytoEncoding, List<byte> encodedText)
+        {
+            /* The encoded huf file will have the following structure:
+             * [(byte) Number of characters in the Key] [KEY { (byte) character, (ushort) frequency }]
+             * ...
+             * [(int) Number of encoded bytes] [(byte) Last byte offset] [(byte) Encoded Text]
+             * ...
+             */
+
+            // Number of encoded bytes
+            byte[] numberOfBytesEncoded = BitConverter.GetBytes(encodedText.Count());
+
+
+            List<byte> encodedFileList = new List<byte>();
+
+            // Append Key and EncodedText + LastByteOffst
+            encodedFileList.AddRange(keytoEncoding);
+            encodedFileList.AddRange(encodedText);
+
+            return encodedFileList;
+        }
+
 
         public void start()
         {
@@ -228,16 +242,8 @@ namespace Huffman
             List<byte> encodedText = comp.GenerateBinaryEncoding(encodedDict, myText);
             List<byte> encodedKey = comp.CreateEncodingKey(myNewList);
 
-            byte lastByteOffset = encodedText[encodedText.Count() - 1];
-            encodedText.RemoveAt(encodedText.Count() - 1);
-            byte [] sizeOfEncodedText = BitConverter.GetBytes(encodedText.Count());
-
             // Used for minor testing will remove later
-            List<byte> encodedFileList = new List<byte>();
-            encodedFileList.AddRange(encodedKey);
-            encodedKey.AddRange(sizeOfEncodedText);
-            encodedKey.Add(lastByteOffset);
-            encodedKey.AddRange(encodedText);
+            List<byte> encodedFileList = comp.BuildFullEndcodedList(encodedKey, encodedText);
 
             comp.WriteBytesToFile("mycompressed", "huf", encodedFileList);
         }

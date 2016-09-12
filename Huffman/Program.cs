@@ -30,9 +30,30 @@ namespace Huffman
             else if (arguments.getArgs()
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("c")) != null)
             {
-                Console.WriteLine("Let's begin compressing...");
-                Compress comp = new Compress(arguments.fileName);
+
+                string path = @"C:\Users\Christian\Documents\mycompressed.huf";
+
+                string myText = "abbcccXXXXZZZZZ";
+                Compress comp = new Compress("Generic");
                 comp.start();
+
+                List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
+
+                HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
+                Dictionary<char, string> encodedDict = comp.CreateNewBinaryDictionary(root);
+                // Create Expected Key
+                List<byte> encodedText = comp.GenerateBinaryEncoding(encodedDict, myText);
+                List<byte> expectedKey = comp.CreateEncodingKey(myNewList);
+
+
+                
+                // Instatiate an Uncompress object and extract the key
+                Uncompress uncomp = new Uncompress(path);
+                List<byte> rawBytes = uncomp.ReadBytesFromFile(path);
+
+                List<byte> testKey = uncomp.GetKeyFromBytes(rawBytes);
+
+                List<byte> encodedList = uncomp.GetEncodedBytesFromFile(rawBytes);
             }
             else if (arguments.getArgs()
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("u")) != null)

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huffman", "Huffman\Huffman.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompressText.NUnitTest", "GetText.NUnitTest\CompressText.NUnitTest.csproj", "{CA9B4A96-927C-4B81-8D03-3B48CB244929}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UncompressFile.NunitTest", "UncompressFile.NunitTest\UncompressFile.NunitTest.csproj", "{8B0A33BD-9618-4107-B122-72D99F60F47C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{CA9B4A96-927C-4B81-8D03-3B48CB244929}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA9B4A96-927C-4B81-8D03-3B48CB244929}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA9B4A96-927C-4B81-8D03-3B48CB244929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B0A33BD-9618-4107-B122-72D99F60F47C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B0A33BD-9618-4107-B122-72D99F60F47C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B0A33BD-9618-4107-B122-72D99F60F47C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B0A33BD-9618-4107-B122-72D99F60F47C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

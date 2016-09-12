@@ -8,30 +8,21 @@ namespace Huffman
 {
     public abstract class Presser : ICommonPress
     {
-        public abstract List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data);
-        public string GetTextFromFile(string fileName)
+        //public abstract List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data);
+        public List<byte> ReadBytesFromFile(string fileName)
         {
-            FileStream fs = null;
-            string readText = "";
+            List<byte> readInBytes = new List<byte>();
+
             try
             {
-                fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                using (StreamReader sr = new StreamReader(fs))
-                {
-                    fs = null;
-                    readText = sr.ReadToEnd();
-                }
+                byte [] readBytes = File.ReadAllBytes(fileName);
+                readInBytes.AddRange(readBytes);
             }
             catch (Exception e)
             {
                 throw e;
             }
-            finally
-            {
-                if (fs != null)
-                    fs.Dispose();
-            }
-            return readText;
+            return readInBytes;
         }
 
         public void WriteBytesToFile(string fileName, string ext, List<byte> bytesToWrite)
@@ -45,6 +36,19 @@ namespace Huffman
             {
                 throw e;
             }
+        }
+
+        public List<Tuple<string, int, HuffmanNode>> ConvertDictToList(Dictionary<char, int> table)
+        {
+            List<Tuple<string, int, HuffmanNode>> convertedList = new List<Tuple<string, int, HuffmanNode>>();
+            foreach (KeyValuePair<char, int> entry in table)
+            {
+                string key = entry.Key.ToString();
+                int pair = entry.Value;
+                HuffmanNode node = new HuffmanNode(key, pair);
+                convertedList.Add(new Tuple<string, int, HuffmanNode>(key, pair, node));
+            }
+            return convertedList;
         }
     }
 }
