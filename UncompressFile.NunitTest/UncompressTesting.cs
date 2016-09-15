@@ -100,10 +100,75 @@ namespace UncompressFile.NunitTest
             List<byte> rawBytes = uncomp.ReadBytesFromFile(path);
 
             List<byte> encodedList = uncomp.GetEncodedBytesFromFile(rawBytes);
-
-
             CollectionAssert.AreEqual(expectedList, encodedList);
         }
+
+        [Test]
+        public void TestRootNodeFromEncodedFile()
+        {
+            string path = @"C:\Users\Christian\Documents\mycompressed.huf";
+            string myText = "abbcccXXXXZZZZZ";
+
+            Uncompress uncomp = new Uncompress(path);
+            List<byte> rawBytes = uncomp.ReadBytesFromFile(path);
+
+            List<byte> testKey = uncomp.GetKeyFromBytes(rawBytes);
+            List<Tuple<string, int, HuffmanNode>> testList = uncomp.GetFrequencyList(testKey);
+
+            HuffmanNode root = uncomp.ConstructHuffmanTree(testList);
+            Assert.That(myText.Count, Is.EqualTo(root._freq));
+        }
+
+        [Test]
+        public void EncodedDictionaryFromEncodedFileTest()
+        {
+            Dictionary<char, string> testDict = new Dictionary<char, string>();
+            testDict.Add('a', "111");
+            testDict.Add('b', "110");
+            testDict.Add('c', "10");
+            testDict.Add('X', "01");
+            testDict.Add('Z', "00");
+
+            string path = @"C:\Users\Christian\Documents\mycompressed.huf";
+            Uncompress uncomp = new Uncompress(path);
+            List<byte> rawBytes = uncomp.ReadBytesFromFile(path);
+
+            List<byte> testKey = uncomp.GetKeyFromBytes(rawBytes);
+            List<Tuple<string, int, HuffmanNode>> testList = uncomp.GetFrequencyList(testKey);
+
+            HuffmanNode root = uncomp.ConstructHuffmanTree(testList);
+            Dictionary<char, string> encodedDict = uncomp.CreateNewBinaryDictionary(root);
+
+            Assert.AreEqual(ToAssertTableString(testDict), ToAssertTableString(encodedDict));
+        }
+
+        public string ToAssertTableString(IDictionary<char, string> dictionary)
+        {
+            var pairStrings = dictionary.OrderBy(p => p.Key)
+                .Select(p => p.Key + ": " + string.Join(", ", p.Value));
+            return string.Join("; ", pairStrings);
+        }
+
+        [Test]
+        public void DecodeTextCompression()
+        {
+            string path = @"C:\Users\Christian\Documents\mycompressed.huf";
+            string myText = "abbcccXXXXZZZZZ";
+
+            Uncompress uncomp = new Uncompress(path);
+            List<byte> rawBytes = uncomp.ReadBytesFromFile(path);
+
+            List<byte> testKey = uncomp.GetKeyFromBytes(rawBytes);
+            List<byte> encodedBytesList = uncomp.GetEncodedBytesFromFile(rawBytes);
+            List<Tuple<string, int, HuffmanNode>> testList = uncomp.GetFrequencyList(testKey);
+
+            HuffmanNode root = uncomp.ConstructHuffmanTree(testList);
+            Dictionary<char, string> huffmanKey = uncomp.CreateNewBinaryDictionary(root);
+
+            string decodedText = uncomp.DecodeBytes(huffmanKey, encodedBytesList);
+            Assert.That(myText, Is.EqualTo(decodedText));
+        }
+
     }
 
 }

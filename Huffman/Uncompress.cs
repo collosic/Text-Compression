@@ -48,11 +48,45 @@ namespace Huffman
             List<byte> byteCopy = new List<byte>(rawBytes);
             List<byte> encodedList = new List<byte>();
             int encodedOffset = (int) byteCopy[0];
+            byteCopy.RemoveAt(0);
 
-            byteCopy.RemoveRange(0, (encodedOffset * 3) + 1);
+            byteCopy.RemoveRange(0, (encodedOffset * 3));
 
             return byteCopy;
         }
 
+        public string DecodeBytes(Dictionary<char, string> huffmanKey, List<byte> encodedBytes)
+        {
+            // Extract the Last Byte Offset from the encoded bytes list
+            int numOfBytesLeft = encodedBytes.Count();
+            int lastByteOffset = encodedBytes[numOfBytesLeft - 1];
+            encodedBytes.RemoveAt(numOfBytesLeft - 1);
+            numOfBytesLeft--;
+            
+            int numBitsInByte = 8;
+            StringBuilder encodedBits = new StringBuilder();
+            StringBuilder decodedText = new StringBuilder();
+            
+
+            foreach (byte b in encodedBytes)
+            {
+                int bitLimit = (--numOfBytesLeft > 0) ? numBitsInByte : lastByteOffset;
+
+                for (int i = 1; i <= bitLimit; ++i)
+                {
+                    char bit = ((b & (1 << i - 1)) != 0) ? '1' : '0';
+                    encodedBits.Append(bit);
+                    char character = huffmanKey.FirstOrDefault(
+                                            x => x.Value == encodedBits.ToString()).Key;
+
+                    if (character != '\0')
+                    {
+                        decodedText.Append(character);
+                        encodedBits.Clear();
+                    }
+                }                
+            }
+            return decodedText.ToString();
+        }
     }
 }

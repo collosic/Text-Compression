@@ -31,29 +31,21 @@ namespace Huffman
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("c")) != null)
             {
 
-                string path = @"C:\Users\Christian\Documents\mycompressed.huf";
-
-                string myText = "abbcccXXXXZZZZZ";
-                Compress comp = new Compress("Generic");
-                comp.start();
-
-                List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
-
-                HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
-                Dictionary<char, string> encodedDict = comp.CreateNewBinaryDictionary(root);
-                // Create Expected Key
-                List<byte> encodedText = comp.GenerateBinaryEncoding(encodedDict, myText);
-                List<byte> expectedKey = comp.CreateEncodingKey(myNewList);
-
-
-                
                 // Instatiate an Uncompress object and extract the key
+                string path = @"C:\Users\Christian\Documents\mycompressed.huf";
+                string myText = "abbcccXXXXZZZZZ";
+
                 Uncompress uncomp = new Uncompress(path);
                 List<byte> rawBytes = uncomp.ReadBytesFromFile(path);
 
                 List<byte> testKey = uncomp.GetKeyFromBytes(rawBytes);
+                List<byte> encodedBytesList = uncomp.GetEncodedBytesFromFile(rawBytes);
+                List<Tuple<string, int, HuffmanNode>> testList = uncomp.GetFrequencyList(testKey);
 
-                List<byte> encodedList = uncomp.GetEncodedBytesFromFile(rawBytes);
+                HuffmanNode root = uncomp.ConstructHuffmanTree(testList);
+                Dictionary<char, string> huffmanKey = uncomp.CreateNewBinaryDictionary(root);
+
+                string decodedText = uncomp.DecodeBytes(huffmanKey, encodedBytesList);
             }
             else if (arguments.getArgs()
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("u")) != null)
