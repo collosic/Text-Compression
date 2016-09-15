@@ -169,6 +169,40 @@ namespace UncompressFile.NunitTest
             Assert.That(myText, Is.EqualTo(decodedText));
         }
 
+        [Test]
+        public void DecodeTextOnEdgeCase()
+        {
+            // Compress
+            string myText = "aaabbbbbcccccccc";
+            string fileName = @"C:\Users\Christian\Downloads\edge_case";
+            Compress comp = new Compress("Generic");
+            List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
+
+            HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
+            Dictionary<char, string> encodedDict = comp.CreateNewBinaryDictionary(root);
+            List<byte> encodedText = comp.GenerateBinaryEncoding(encodedDict, myText);
+            List<byte> encodedKey = comp.CreateEncodingKey(myNewList);
+            List<byte> encodedFileList = comp.BuildFullEndcodedList(encodedKey, encodedText);
+
+            // Uncompress
+            Uncompress uncomp = new Uncompress(fileName + ".huf");
+            List<byte> rawBytes = new List<byte>();
+            rawBytes.AddRange(encodedFileList);
+
+            List<byte> testKey = uncomp.GetKeyFromBytes(rawBytes);
+            List<byte> encodedBytesList = uncomp.GetEncodedBytesFromFile(rawBytes);
+            List<Tuple<string, int, HuffmanNode>> testList = uncomp.GetFrequencyList(testKey);
+
+            HuffmanNode rootNode = uncomp.ConstructHuffmanTree(testList);
+            Dictionary<char, string> huffmanKey = uncomp.CreateNewBinaryDictionary(rootNode);
+
+            string decodedText = uncomp.DecodeBytes(huffmanKey, encodedBytesList);
+
+            List<byte> myList = new List<byte>();
+            myList.AddRange(Encoding.Unicode.GetBytes(decodedText));
+            Assert.That(myText, Is.EqualTo(decodedText));
+
+        }
     }
 
 }

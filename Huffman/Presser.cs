@@ -60,7 +60,7 @@ namespace Huffman
                 // Sort the list by the frequency number in ascending order, removing from the tails each time
                 editableList.Sort((x, y) => y.Item2.CompareTo(x.Item2));
 
-                // Get the number of tuples and extrac the last two nodes with the smallest frequencies
+                // Get the number of tuples and extract the last two nodes with the smallest frequencies
                 int listCount = editableList.Count;
                 HuffmanNode right = editableList.ElementAt(listCount - 1).Item3;
                 HuffmanNode left = editableList.ElementAt(listCount - 2).Item3;
@@ -87,6 +87,8 @@ namespace Huffman
         {
             Dictionary<char, string> encodedDict = new Dictionary<char, string>();
             Stack<char> binaryEncodingStack = new Stack<char>();
+
+            // TODO: Comment on the DFS
             DFS(rootNode, binaryEncodingStack, encodedDict);
             return encodedDict;
         }

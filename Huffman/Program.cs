@@ -31,21 +31,37 @@ namespace Huffman
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("c")) != null)
             {
 
-                // Instatiate an Uncompress object and extract the key
-                string path = @"C:\Users\Christian\Documents\mycompressed.huf";
-                string myText = "abbcccXXXXZZZZZ";
+                string myText = "The loop is unnecessary, you can just get the byte array from the string and then call the AddRange() method of List to add them to the list.";
+                string fileName = @"C:\Users\Christian\Downloads\edge_case";
+                Compress comp = new Compress("Generic");
+                List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
 
-                Uncompress uncomp = new Uncompress(path);
-                List<byte> rawBytes = uncomp.ReadBytesFromFile(path);
+                HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
+                Dictionary<char, string> encodedDict = comp.CreateNewBinaryDictionary(root);
+                List<byte> encodedText = comp.GenerateBinaryEncoding(encodedDict, myText);
+                List<byte> encodedKey = comp.CreateEncodingKey(myNewList);
+                List<byte> encodedFileList = comp.BuildFullEndcodedList(encodedKey, encodedText);
+
+                comp.WriteBytesToFile(fileName, "huf", encodedFileList);
+
+                // Uncompress
+                Uncompress uncomp = new Uncompress(fileName + ".huf");
+                List<byte> rawBytes = new List<byte>();
+                rawBytes.AddRange(encodedFileList);
 
                 List<byte> testKey = uncomp.GetKeyFromBytes(rawBytes);
                 List<byte> encodedBytesList = uncomp.GetEncodedBytesFromFile(rawBytes);
                 List<Tuple<string, int, HuffmanNode>> testList = uncomp.GetFrequencyList(testKey);
 
-                HuffmanNode root = uncomp.ConstructHuffmanTree(testList);
-                Dictionary<char, string> huffmanKey = uncomp.CreateNewBinaryDictionary(root);
+                HuffmanNode rootNode = uncomp.ConstructHuffmanTree(testList);
+                Dictionary<char, string> huffmanKey = uncomp.CreateNewBinaryDictionary(rootNode);
 
                 string decodedText = uncomp.DecodeBytes(huffmanKey, encodedBytesList);
+
+                List<byte> myList = new List<byte>();
+                myList.AddRange(Encoding.Unicode.GetBytes(decodedText));
+
+                uncomp.WriteBytesToFile(fileName, "txt", myList);
             }
             else if (arguments.getArgs()
                 .FirstOrDefault(stringToCheck => stringToCheck.Contains("u")) != null)

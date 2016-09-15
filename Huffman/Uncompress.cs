@@ -45,40 +45,41 @@ namespace Huffman
 
         public List<byte> GetEncodedBytesFromFile(List<byte> rawBytes)
         {
-            List<byte> byteCopy = new List<byte>(rawBytes);
-            List<byte> encodedList = new List<byte>();
-            int encodedOffset = (int) byteCopy[0];
-            byteCopy.RemoveAt(0);
+            List<byte> encodedTextCopy = new List<byte>(rawBytes);
+            int numOfKeyValuePairs = (int) encodedTextCopy[0];
+            int numOfBytesPerKeyValuePair = 3;
 
-            byteCopy.RemoveRange(0, (encodedOffset * 3));
-
-            return byteCopy;
+            // Remove the keyOffset byte followed by the huffman key
+            encodedTextCopy.RemoveAt(0);
+            encodedTextCopy.RemoveRange(0, (numOfKeyValuePairs * numOfBytesPerKeyValuePair));
+            return encodedTextCopy;
         }
 
         public string DecodeBytes(Dictionary<char, string> huffmanKey, List<byte> encodedBytes)
         {
-            // Extract the Last Byte Offset from the encoded bytes list
+            int numBitsInByte = 8;
             int numOfBytesLeft = encodedBytes.Count();
             int lastByteOffset = encodedBytes[numOfBytesLeft - 1];
             encodedBytes.RemoveAt(numOfBytesLeft - 1);
-            numOfBytesLeft--;
-            
-            int numBitsInByte = 8;
+            numOfBytesLeft = encodedBytes.Count();
+
             StringBuilder encodedBits = new StringBuilder();
             StringBuilder decodedText = new StringBuilder();
             
-
             foreach (byte b in encodedBytes)
             {
-                int bitLimit = (--numOfBytesLeft > 0) ? numBitsInByte : lastByteOffset;
+                int bitLimit = (--numOfBytesLeft > 0 || lastByteOffset == 0) ? numBitsInByte : lastByteOffset;
 
                 for (int i = 1; i <= bitLimit; ++i)
                 {
+                    // Test if the bit is turned on or off and append to string
                     char bit = ((b & (1 << i - 1)) != 0) ? '1' : '0';
                     encodedBits.Append(bit);
+
+                    // Do a reverse dictionary lookup for matching bit strings
                     char character = huffmanKey.FirstOrDefault(
                                             x => x.Value == encodedBits.ToString()).Key;
-
+                    // If the character is not \0 then add it to decoded text string
                     if (character != '\0')
                     {
                         decodedText.Append(character);
