@@ -2,115 +2,136 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Huffman
 {
-    class Arguments
+    public enum State
+    {
+        Help,
+        Compress,
+        Uncompress
+    };
+
+    public class Arguments
     {
         // private member data
-        private string[] args;
-        private List<string> arguments;
-        public string fileName { get; private set; }
+        private List<char> options;
+        private List<string> files;
+        
+        // private setters publuc getters
+        public List<string> arguments { get; private set; }
+        public State state { get; private set; }
+        public bool isVerbose { get; private set; }
+        public string incomingFileName { get; private set; }
+        public string outgoingFileName { get; private set; }
 
         // constructor
         public Arguments(string[] incomingArguments)
         {
-            args = new string[incomingArguments.Length];
-            incomingArguments.CopyTo(args, 0);
+            options = new List<char>();
+            files = new List<string>();
             arguments = new List<string>();
+            arguments.AddRange(incomingArguments);
+            state = State.Help;
+            isVerbose = false;
+            incomingFileName = null;
+            outgoingFileName = null;
         }
 
         public void checkArguments ()
         {
-            int argsLength = args.Length;
+            int argsLength = arguments.Count;
 
             // check and see if no arguments were entered
-            if (argsLength < 1)
+            if (argsLength < 2 || argsLength > 4)
             {
-                throw new ArgumentException("no arguments passed");
+                throw new ArgumentException("Incorrect use of arguments");
             }
 
             // check for minimum # of args and separate them if needed
-            for (int i = 0, j = 0; i < argsLength; i++)
+            foreach (string arg in arguments)
             {
-                if (i == (argsLength - 1))
+                // If the currect argument has a / or - we determine a state or action
+                if (verifyFlag(arg) && options.Count <= 2)
                 {
-                    // we need to determine if help alone was requested
-                    if (!verifyDash(args[i]))
-                    {
-                        fileName = args[argsLength - 1];
-                    }
-                    else
-                    {
-                        arguments.Add(args[i][1].ToString());
-                    }
-                }
-                else if (args[i].Length == 2)
-                {
-                    if (!verifyDash(args[i]))
-                    {
-                        throw new ArgumentException(args[i]);
-                    }
-                    arguments.Add(args[i][1].ToString());
-                }
-                else if (args[i].Length > 2)
-                {
-                    // here a user has concatenated arguments ex. -cae
-                    separateArgs(args[i], ref j);
-                }
-                else if (args[i].Length < 1)
-                {
-                    Console.WriteLine("Invalid number of parameters, use /h for help");
-                    System.Environment.Exit(1);
+                    separateOptions(arg);
                 }
                 else
                 {
-                    arguments.Add(args[i][1].ToString());
-                    if (arguments[0] != "h")
+                    // Here we are likely have an incoming text or the output file name
+                    if (files.Count <= 2)
                     {
-                        Console.WriteLine("Invalid number of parameters, use /h for help");
-                        System.Environment.Exit(1);
+                        files.Add(arg);
                     }
                 }
             }
 
+            // Here we need to make sure we have the correct options and files needed
+
+            if (options.Count < 1 || options.Count > 2)
+            {
+                throw new Exception("Options error");
+            }
+
+            foreach (char o in options)
+            {
+                DetermineOptions(o);
+            }
+
+            if (files.Count < 1 || files.Count > 2)
+            {
+                throw new Exception("No source file detected");
+            }
+            if (files.Count == 1)
+            {
+                incomingFileName = files[0];
+            }
+            if (files.Count == 2)
+            {
+                incomingFileName = files[0];
+                outgoingFileName = files[1];
+            }
+
         }
-        private bool verifyDash (string arg)
+        private bool verifyFlag (string arg)
         {
+            // The Console application will support / and - for arguments and flags
             return arg[0] == '/' || arg[0] == '-' ? true : false;
         }
 
-        public void display()
+        private void separateOptions(string arg)
         {
-            for (int i = 0; i < arguments.Count; i++)
+            // remove the / or - and extract option(s)
+            string characters = arg.Remove(0, 1);
+            foreach (char c in characters)
             {
-                Console.WriteLine("{0}", arguments[i]);
+                if (!Char.IsLetter(c))
+                {
+                    throw new ArgumentException(c.ToString());
+                }
+                options.Add(c);
             }
-            
-            Console.WriteLine("{0}", fileName);
         }
 
-        private void separateArgs(string arg, ref int j)
+        private void DetermineOptions(char option)
         {
-            // check that the argument starts with -
-            if (!verifyDash(arg))
+            switch (Char.ToLower(option))
             {
-                throw new ArgumentException(arg);
+                case 'c':
+                    state = State.Compress;
+                    break;
+                case 'u':
+                    state = State.Uncompress;
+                    break;
+                case 'h':
+                    state = State.Help;
+                    break;
+                case 'v':
+                    isVerbose = true;
+                    break;
+                default:
+                    throw new ArgumentException("'" + option + "' option not recognized");
             }
-            
-            for (int i = 1; i < arg.Length; i++)
-            {
-                if (!Char.IsLetter(arg[i]))
-                {
-                    throw new ArgumentException(arg);
-                }
-                arguments.Add(arg[i].ToString());
-            }
-        }
-        public List<string> getArgs()
-        {
-            return arguments;
         }
     }
 }

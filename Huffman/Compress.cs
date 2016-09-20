@@ -3,29 +3,37 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Huffman
 {
     public class Compress : Presser
     {
         // Variables needed in Compress
+        private string incoming;
+        private string outgoing;
         private string path;
-        //private string readInText;
+        private int sizeOfTextFile;
+        private int sizeOfCompressedFile;
 
-        public Compress(string path)
+
+        public Compress(string incoming, string outgoing = null)
         {
-            this.path = String.Copy(path);
+            this.incoming = String.Copy(incoming);
+            this.outgoing = outgoing == null ? GetOutgoingFileName(this.incoming) : outgoing;
+            this.path = Path.GetDirectoryName(this.outgoing);
         }
 
         // Abstract Method implementation
         public List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data)
         {
             Dictionary<char, int> frequencyTable = new Dictionary<char, int>();
+            int ASCII_LIMIT = 128;
 
             // Check if char is ASCII
             foreach (char c in data)
             {
-                if (c < 128)
+                if (c < ASCII_LIMIT)
                 {
                     frequencyTable[c] = frequencyTable.ContainsKey(c) ? frequencyTable[c] + 1 : 1;
                 }
@@ -39,6 +47,10 @@ namespace Huffman
             return frequencyList;
         }
 
+        private string GetOutgoingFileName(string filepath)
+        {
+            return Path.GetFileNameWithoutExtension(filepath);
+        }
         public string ConvertBytesToText(List<byte> bytes)
         {
             return System.Text.Encoding.UTF8.GetString(bytes.ToArray());
@@ -161,21 +173,109 @@ namespace Huffman
             return encodedFileList;
         }
         
-        public void start()
+        public void Start()
         {
-            string myText = "abbcccXXXXZZZZZ";
-            Compress comp = new Compress("Generic");
-            List<Tuple<string, int, HuffmanNode>> myNewList = comp.GetFrequencyList(myText);
+            try
+            {
+                Console.Write(" Compressing:", Path.GetFileName(this.incoming));
+                int progress = 0;
+                // Read in bytes and convert to a string buffer
+                DrawText(progress += 10, 100);
+                List<byte> byteList = ReadBytesFromFile(this.incoming);
+                this.sizeOfTextFile = byteList.Count;
+                DrawText(progress += 10, 100);
+                string textBuffer = System.Text.Encoding.UTF8.GetString(byteList.ToArray());
 
-            HuffmanNode root = comp.ConstructHuffmanTree(myNewList);
-            Dictionary<char, string> encodedDict = comp.CreateNewBinaryDictionary(root);
-            List<byte> encodedText = comp.GenerateBinaryEncoding(encodedDict, myText);
-            List<byte> encodedKey = comp.CreateEncodingKey(myNewList);
+                // Generate frequency table and Huffman tree  
+                DrawText(progress += 10, 100);
+                List<Tuple<string, int, HuffmanNode>> freqList = GetFrequencyList(textBuffer);
+                DrawText(progress += 10, 100);
+                HuffmanNode rootNode = ConstructHuffmanTree(freqList);
 
-            // Used for minor testing will remove later
-            List<byte> encodedFileList = comp.BuildFullEndcodedList(encodedKey, encodedText);
+                // Generate Encoded dictionary (key) for converting ASCII into a new binary format        
+                DrawText(progress += 10, 100);
+                Dictionary<char, string> encodedDict = CreateNewBinaryDictionary(rootNode);
 
-            comp.WriteBytesToFile("mycompressed", "huf", encodedFileList);
+
+                // Using the Encoded dictionary to create the encoded text and encoded key 
+                // **NOTE: The encoded key is used to decode the compressed file back into text  
+                DrawText(progress += 10, 100);
+                List<byte> encodedText = GenerateBinaryEncoding(encodedDict, textBuffer);
+                DrawText(progress += 10, 100);
+                List<byte> encodedKey = CreateEncodingKey(freqList);
+                DrawText(progress += 10, 100);
+                List<byte> encodedFile = BuildFullEndcodedList(encodedKey, encodedText);
+                DrawText(progress += 10, 100);
+                this.sizeOfCompressedFile = encodedFile.Count;
+
+                // Write encoded bytes to file
+                DrawText(progress += 10, 100);
+                WriteBytesToFile(path + outgoing, "huf", encodedFile);
+                DrawText(progress, 100);
+                Console.WriteLine("\n");
+                Console.WriteLine(" Completed Compression! \n");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(" \n\nThe following error occurred during compression: {0}", e.Message);
+                System.Environment.Exit(1);
+            }
+        }
+
+        public void VerboseMode()
+        {
+            if (this.sizeOfCompressedFile > this.sizeOfTextFile)
+            {
+                Console.WriteLine(" Unfortunately, the compression algorighm was unable to reduce the byte size =(");
+                return;
+            }
+            else
+            {
+                int difference = this.sizeOfTextFile - this.sizeOfCompressedFile;
+                float percent = ((float) difference / (float) sizeOfTextFile) * 100;
+                string fullPath = Path.GetFullPath(Path.GetFullPath(this.outgoing));
+                Console.WriteLine(" Size of original text file: {0} bytes", this.sizeOfTextFile);
+                Console.WriteLine(" Size of compressed file: {0} bytes", this.sizeOfCompressedFile);
+                Console.WriteLine(" Number of Bytes reduced: {0} bytes", difference);
+                Console.WriteLine(" Text file was reduced by: {0:F2}%", percent);
+                Console.WriteLine(" File Location: {0}", fullPath.Substring(0, fullPath.LastIndexOf('\\')));
+            }
+            Console.WriteLine(" File saved as {0}.{1}", this.outgoing, "huf");
+            Console.Read();
+        }
+
+        private void DrawText(int progress, int total)
+        {
+            int start = " Compressing: ".Count() - 1;
+            Console.CursorLeft = start + 1;
+            Console.Write("[");
+            Console.CursorLeft = start + 33;
+            Console.Write("]");
+            Console.CursorLeft = start + 2;
+            float onechunk = 30.0f / total;
+
+            //draw filled part
+            int position = start + 2;
+            for (int i = 0; i < (onechunk * progress); i++)
+            {
+                Console.BackgroundColor = ConsoleColor.DarkCyan;
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;                
+                Console.CursorLeft = position++;
+                Console.Write("=");
+            }
+            Console.ResetColor();
+            //draw unfilled part
+            for (int i = position; i <= start + 31; i++)
+            {
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.CursorLeft = position++;
+                Console.Write(" ");
+            }
+
+            //draw totals
+            Console.CursorLeft = start + 36;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Write(progress.ToString() + " of " + total.ToString() + "    "); //blanks at the end remove any excess
         }
     }
 }

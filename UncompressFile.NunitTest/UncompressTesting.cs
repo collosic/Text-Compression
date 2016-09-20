@@ -201,8 +201,37 @@ namespace UncompressFile.NunitTest
             List<byte> myList = new List<byte>();
             myList.AddRange(Encoding.Unicode.GetBytes(decodedText));
             Assert.That(myText, Is.EqualTo(decodedText));
+        }
+        [Test]
+        public void ArgumentsUnitTestCases()
+        {
+            // Test for too few arguments
+            string[] args1 = { "/c" };
+            Arguments arguments = new Arguments(args1);
+            Assert.Throws(typeof(ArgumentException), delegate { arguments.checkArguments(); });
+
+            // Test for too many arguments
+            string[] args2 = { "/c", "/v", "/h", "toomuch.txt",  "yaaasssss" };
+            arguments = new Arguments(args2);
+            Assert.Throws(typeof(ArgumentException), delegate { arguments.checkArguments(); });
+
+            // Test for options only
+            string[] args3 = { "/c", "/v" };
+            arguments = new Arguments(args3);
+            Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
+
+            // Test for file names only
+            string[] args4 = { "myfile.txt", "hello" };
+            arguments = new Arguments(args4);
+            Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
+
+            string[] args5 = { "myfile.txt" };
+            arguments = new Arguments(args5);
+            Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
+
+            // Test for edge cases
+
 
         }
     }
-
 }
