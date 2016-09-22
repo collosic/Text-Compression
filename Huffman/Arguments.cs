@@ -45,7 +45,7 @@ namespace Huffman
             // check and see if no arguments were entered
             if (argsLength < 2 || argsLength > 4)
             {
-                throw new ArgumentException("Incorrect use of arguments");
+                throw new Exception("Incorrect use of arguments");
             }
 
             // check for minimum # of args and separate them if needed
@@ -71,6 +71,14 @@ namespace Huffman
             if (options.Count < 1 || options.Count > 2)
             {
                 throw new Exception("Options error");
+            }
+            // Check for multiple options of the same kind e.g. /c /c
+            var foundDuplicates = options.GroupBy(x => x)
+                                         .Where(group => group.Count() > 1)
+                                         .Select(group => group.Key);
+            if (foundDuplicates.Count() != 0)
+            {
+                throw new Exception("Found duplicate options");
             }
 
             foreach (char o in options)
@@ -107,7 +115,7 @@ namespace Huffman
             {
                 if (!Char.IsLetter(c))
                 {
-                    throw new ArgumentException(c.ToString());
+                    throw new Exception(c.ToString());
                 }
                 options.Add(c);
             }
@@ -130,7 +138,7 @@ namespace Huffman
                     isVerbose = true;
                     break;
                 default:
-                    throw new ArgumentException("'" + option + "' option not recognized");
+                    throw new Exception("'" + option + "' option not recognized");
             }
         }
     }

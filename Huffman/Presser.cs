@@ -8,6 +8,9 @@ namespace Huffman
 {
     public abstract class Presser : ICommonPress
     {
+        protected int percentage;
+        protected int progLocation;
+        protected int percInc;
         //public abstract List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data);
         public List<byte> ReadBytesFromFile(string fileName)
         {
@@ -22,6 +25,7 @@ namespace Huffman
             {
                 throw e;
             }
+            DrawText(percentage += percInc, 100, progLocation);
             return readInBytes;
         }
         
@@ -36,6 +40,7 @@ namespace Huffman
             {
                 throw e;
             }
+            DrawText(percentage += percInc, 100, progLocation);
         }
         
         public List<Tuple<string, int, HuffmanNode>> ConvertDictToList(Dictionary<char, int> table)
@@ -78,8 +83,9 @@ namespace Huffman
                 editableList.RemoveAt(listCount - 1);
                 editableList.RemoveAt(listCount - 2);
 
-                editableList.Add(new Tuple<string, int, HuffmanNode>(mergedChars, mergedFreq, parentNode));
+                editableList.Add(new Tuple<string, int, HuffmanNode>(mergedChars, mergedFreq, parentNode));                
             }
+            DrawText(percentage += percInc, 100, progLocation);
             return editableList[0].Item3;
         }
         
@@ -90,6 +96,7 @@ namespace Huffman
 
             // TODO: Comment on the DFS
             DFS(rootNode, binaryEncodingStack, encodedDict);
+            DrawText(percentage += percInc, 100, progLocation);
             return encodedDict;
         }
 
@@ -118,6 +125,44 @@ namespace Huffman
                     binaryEncodingStack.Pop();
                 }
             }
+        }
+
+        protected void DrawText(int progress, int total, int start)
+        {
+            Console.CursorLeft = start;
+            Console.Write("[");
+            Console.CursorLeft = start + 32;
+            Console.Write("]");
+            Console.CursorLeft = start + 1;
+            float onechunk = 30.0f / total;
+
+            //draw filled part
+            int position = start + 1;
+            for (int i = 0; i < (onechunk * progress); i++)
+            {
+                Console.BackgroundColor = ConsoleColor.DarkCyan;
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.CursorLeft = position++;
+                Console.Write(" ");
+            }
+            Console.ResetColor();
+            //draw unfilled part
+            for (int i = position; i <= start + 30; i++)
+            {
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.CursorLeft = position++;
+                Console.Write(" ");
+            }
+
+            //draw totals
+            Console.CursorLeft = start + 35;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Write(progress.ToString() + " of " + total.ToString() + "    "); //blanks at the end remove any excess
+        }
+
+        protected string GetOutgoingFileName(string filepath)
+        {
+            return Path.GetFileNameWithoutExtension(filepath);
         }
     }
 }

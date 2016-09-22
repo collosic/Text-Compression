@@ -29,7 +29,8 @@ namespace Huffman
                     if (arguments.isVerbose) compress.VerboseMode();
                     break;
                 case State.Uncompress:
-
+                    Uncompress uncompress = new Uncompress(arguments.incomingFileName, arguments.outgoingFileName);
+                    uncompress.Start();
                     break;
                 case State.Help:
                     displayHelpMessage();

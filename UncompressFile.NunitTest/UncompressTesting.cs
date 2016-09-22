@@ -208,12 +208,12 @@ namespace UncompressFile.NunitTest
             // Test for too few arguments
             string[] args1 = { "/c" };
             Arguments arguments = new Arguments(args1);
-            Assert.Throws(typeof(ArgumentException), delegate { arguments.checkArguments(); });
+            Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
 
             // Test for too many arguments
             string[] args2 = { "/c", "/v", "/h", "toomuch.txt",  "yaaasssss" };
             arguments = new Arguments(args2);
-            Assert.Throws(typeof(ArgumentException), delegate { arguments.checkArguments(); });
+            Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
 
             // Test for options only
             string[] args3 = { "/c", "/v" };
@@ -230,7 +230,13 @@ namespace UncompressFile.NunitTest
             Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
 
             // Test for edge cases
+            string[] args6 = { "/c", "/c", "myfile.txt" };
+            arguments = new Arguments(args6);
+            Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
 
+            string[] args7 = { "/z", "/c", "myfile.txt" };
+            arguments = new Arguments(args7);
+            Assert.Throws(typeof(Exception), delegate { arguments.checkArguments(); });
 
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,10 +8,19 @@ namespace Huffman
 {
     public class Uncompress : Presser
     {
+        private string incoming;
+        private string outgoing;
         private string path;
-        public Uncompress(string path)
+        private int sizeOfTextFile;
+        private int sizeOfCompressedFile;
+
+        public Uncompress(string incoming, string outgoing = null)
         {
-            this.path = String.Copy(path);
+            this.incoming = String.Copy(incoming);
+            this.outgoing = outgoing == null ? GetOutgoingFileName(this.incoming) : outgoing;
+            this.path = Path.GetDirectoryName(this.outgoing);
+            this.percentage = 0;
+            this.percInc = 12;
         }
 
         public List<Tuple<string, int, HuffmanNode>> GetFrequencyList(List<byte> keyList)
@@ -88,6 +98,50 @@ namespace Huffman
                 }                
             }
             return decodedText.ToString();
+        }
+
+        public void Start()
+        {
+            try
+            {
+                string textOutput = "\n Decoding: ";
+                Console.Write(textOutput);
+                this.progLocation = textOutput.Length;
+
+                // Read in bytes and convert to a string buffer
+                List<byte> encodedBytes = ReadBytesFromFile(this.incoming);
+
+                // Extract decoding key and the encoded/compressed text and generate a frequency list
+                List<byte> decodingKey = GetKeyFromBytes(encodedBytes);
+                List<byte> encodedText = GetEncodedBytesFromFile(encodedBytes);
+                List<Tuple<string, int, HuffmanNode>> freqList = GetFrequencyList(decodingKey);
+
+                // Create huffman Tree and decoding table
+                HuffmanNode rootNode = ConstructHuffmanTree(freqList);
+                Dictionary<char, string> decodingDict = CreateNewBinaryDictionary(rootNode);
+
+                // Using the decoding table decode the text.  Dump text into a List of bytes
+                string decodedText = DecodeBytes(decodingDict, encodedText);
+                List<byte> decodedBytes = new List<byte>();
+                decodedBytes.AddRange(Encoding.Unicode.GetBytes(decodedText));
+
+                // Write decoded bytes to file
+                WriteBytesToFile(path + outgoing, "txt", decodedBytes);
+                DrawText(100, 100, progLocation);
+                Console.WriteLine("\n");
+                Console.WriteLine(" Decoding Complete! \n");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("\n\n The following error occurred during decoding: {0}", e.Message);
+                System.Environment.Exit(1);
+            }
+
+        }
+
+        public void VerboseMode()
+        {
+
         }
     }
 }
