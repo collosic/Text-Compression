@@ -6,11 +6,13 @@ using System.Linq;
 
 namespace Huffman
 {
-    public abstract class Presser : ICommonPress
+    public abstract class HuffmanTools : ICommonHuffman
     {
+        // Progress Bar variables
         protected int percentage;
         protected int progLocation;
         protected int percInc;
+
         //public abstract List<Tuple<string, int, HuffmanNode>> GetFrequencyList(string data);
         public List<byte> ReadBytesFromFile(string fileName)
         {
@@ -26,6 +28,9 @@ namespace Huffman
                 throw e;
             }
             DrawText(percentage += percInc, 100, progLocation);
+
+            // check and see that the bytes read is zero
+            if (readInBytes.Count() < 1) throw new Exception("0 bytes read, nothing to do here!");
             return readInBytes;
         }
         
@@ -100,6 +105,7 @@ namespace Huffman
             return encodedDict;
         }
 
+        // Modified Depth First Search for traversing and generating the huffman encoding for each character
         public void DFS(HuffmanNode node, Stack<char> binaryEncodingStack, Dictionary<char, string> encodedDict)
         {
             // Traverse each neighboring child node from left to right

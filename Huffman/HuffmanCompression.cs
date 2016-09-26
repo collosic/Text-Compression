@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Huffman
 {
-    public class Compress : Presser
+    public class HuffmanCompression : HuffmanTools
     {
         // Variables needed in Compress
         private string incoming;
@@ -17,7 +17,7 @@ namespace Huffman
         private int sizeOfCompressedFile;
 
 
-        public Compress(string incoming, string outgoing = null)
+        public HuffmanCompression(string incoming, string outgoing = null)
         {
             this.incoming = String.Copy(incoming);
             this.outgoing = outgoing == null ? GetOutgoingFileName(this.incoming) : outgoing;
@@ -31,18 +31,26 @@ namespace Huffman
         {
             Dictionary<char, int> frequencyTable = new Dictionary<char, int>();
             int ASCII_LIMIT = 128;
+            int MAX_FREQ = ushort.MaxValue;
 
             // Check if char is ASCII
             foreach (char c in data)
             {
                 if (c < ASCII_LIMIT)
                 {
+                    // Check and see if the frequency is past the limit of character frequency supported
+                    if (frequencyTable.ContainsKey(c) && frequencyTable[c] + 1 > MAX_FREQ)
+                    {
+                        throw new Exception(String.Format(
+                                "Max frequency of {0} characters for the '{1}' character has been exceeded!", MAX_FREQ, c));
+                    } 
                     frequencyTable[c] = frequencyTable.ContainsKey(c) ? frequencyTable[c] + 1 : 1;
                 }
                 else
                 {
                     // We've come across a character that is not ASCII
-                    throw new Exception("The following is not an ASCII character -> " + c);
+                    throw new Exception(String.Format(
+                        "The following is not an ASCII character -> {0}, '{1}'", c, (int) c));
                 }
             }
             List<Tuple<string, int, HuffmanNode>> frequencyList = ConvertDictToList(frequencyTable);
@@ -82,7 +90,6 @@ namespace Huffman
                         bitIndex = 0x01;
                     }
                 }
-
             }
             // Move the bitIndex back one and convert
             bitIndex >>= 1;
@@ -126,7 +133,6 @@ namespace Huffman
                 default:
                     // Something went seriously wrong here
                     throw new System.ArgumentOutOfRangeException("BitIndex not in range");
-                    break;
             }
             return offset;
         }
@@ -183,7 +189,7 @@ namespace Huffman
                 // Read in bytes and convert to a string buffer
                 List<byte> byteList = ReadBytesFromFile(this.incoming);
                 this.sizeOfTextFile = byteList.Count;
-                string textBuffer = System.Text.Encoding.UTF8.GetString(byteList.ToArray());
+                string textBuffer = System.Text.Encoding.ASCII.GetString(byteList.ToArray());
 
                 // Generate frequency table and Huffman tree  
                 List<Tuple<string, int, HuffmanNode>> freqList = GetFrequencyList(textBuffer);

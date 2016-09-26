@@ -59,13 +59,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Arguments.cs" />
-    <Compile Include="Compress.cs" />
+    <Compile Include="HuffmanCompression.cs" />
     <Compile Include="HuffmanNode.cs" />
-    <Compile Include="ICommonPress.cs" />
-    <Compile Include="Presser.cs" />
+    <Compile Include="ICommonHuffman.cs" />
+    <Compile Include="HuffmanTools.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Uncompress.cs" />
+    <Compile Include="HuffmanExpansion.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

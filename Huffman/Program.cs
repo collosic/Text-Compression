@@ -24,13 +24,14 @@ namespace Huffman
             switch (arguments.state)
             {
                 case State.Compress:
-                    Compress compress = new Compress(arguments.incomingFileName, arguments.outgoingFileName);
+                    HuffmanCompression compress = new HuffmanCompression(arguments.incomingFileName, arguments.outgoingFileName);
                     compress.Start();
                     if (arguments.isVerbose) compress.VerboseMode();
                     break;
                 case State.Uncompress:
-                    Uncompress uncompress = new Uncompress(arguments.incomingFileName, arguments.outgoingFileName);
+                    HuffmanExpansion uncompress = new HuffmanExpansion(arguments.incomingFileName, arguments.outgoingFileName);
                     uncompress.Start();
+                    if (arguments.isVerbose) uncompress.VerboseMode();
                     break;
                 case State.Help:
                     displayHelpMessage();
